@@ -1,13 +1,32 @@
 function onOpen() {
 
-  function blink(foundRows) {
-    const offset = 5;
+  /*
+   * Configuration
+   */ 
+
+  // Please also look at the offset variable on line 23
+  const searchTerm = ""; // Put whatever cell value you want to match inside here
+  const columnToSearch = ""; // Put the column you want to search, ie D5:D (starts at column D row 5, goes till end of column D)
+  const columnToSearchIndex = 0; // Set to the numerical index of the column you want to search (i.e. D -> 4 since its the 4th letter in the alphabet)
+
+  /*
+   * Code
+   */
+
+  const foundRows = [];
+  const sheet = SpreadsheetApp.getActive().getSheetByName("Assignments");
+  const col = sheet.getRange(columnToSearch);
+  const colVals = col.getValues();
+
+  function blink(foundRows, activeSheet, columnIndex) {
+    // Change to the row number where you want to start checking (should be in line with where columnToSearch starts)
+    const offset = 0;
     
     for (let i = 0; i < 5; i++) {
       const oldVals = {};
       for (let cell of foundRows) {
         cell = parseInt(cell);
-        const actualCell = SpreadsheetApp.getActive().getSheetByName("Assignments").getRange(cell + offset, 4);
+        const actualCell = activeSheet.getRange(cell + offset, columnIndex);
         oldVals[cell + offset] = actualCell.getValue();
 
         actualCell.setValue("");
@@ -15,7 +34,7 @@ function onOpen() {
       SpreadsheetApp.flush();
       for (let cell of foundRows) {
         cell = parseInt(cell);
-        const actualCell = SpreadsheetApp.getActive().getSheetByName("Assignments").getRange(cell + offset, 4);
+        const actualCell = activeSheet.getRange(cell + offset, columnIndex);
 
         actualCell.setValue(oldVals[cell + offset]);
       }
@@ -23,20 +42,12 @@ function onOpen() {
     }
   }
 
-  const searchTerm = "In progress"; // Put [U-HP] or whatever inside of here
-  const columnToSearch = "D5:D"; // Put the column you want to search, ie D5:D (starts at column D row 5, goes till end of column D)
-
-  const foundRows = [];
-  const sheet = SpreadsheetApp.getActive().getSheetByName("Assignments");
-  const col = sheet.getRange(columnToSearch);
-  const colVals = col.getValues();
-
   for (let row in colVals) {
     if (colVals[row] == searchTerm) {
       foundRows.push(row);
     }
     if (colVals[row] == "") break;
   }
-  blink(foundRows);
+  blink(foundRows, sheet, columnToSearchIndex);
 
 }
